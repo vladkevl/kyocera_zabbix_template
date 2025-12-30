@@ -1,0 +1,480 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 480670e29a204d208ec225ccace9c3bb
+      name: 'Kyocera printers'
+  templates:
+    - uuid: b8ddcf776b774742bc6b4c0463bde997
+      template: 'Kyocera Color printers'
+      name: 'Kyocera Color printers'
+      groups:
+        - name: 'Kyocera printers'
+      items:
+        - uuid: 52e015ca0add4b35b9bf921384778d73
+          name: 'Тонер: Ресурс черного картриджа'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.8.1.4
+          key: black.capacity.device
+          delay: '86400'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '1'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '1'
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 7418100ceafc4b879d720c49970db85f
+          name: 'Тонер: Остаток черного тонера %'
+          type: CALCULATED
+          key: black.percentage
+          delay: '180'
+          history: 30d
+          units: '%'
+          params: '100*last(//black.toner.device)/last(//black.capacity.device)'
+          tags:
+            - tag: Application
+              value: Счетчики
+          triggers:
+            - uuid: 5dfbf3c0b3cf4e1298f1bfef828ad504
+              expression: 'last(/Kyocera Color printers/black.percentage)<10'
+              name: 'Уровень черного тонера меньше 10%'
+              status: DISABLED
+              priority: AVERAGE
+        - uuid: 9fab5f4e82724d25a4d242964d976854
+          name: 'Тонер: Остаток черного тонера'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.4
+          key: black.toner.device
+          delay: '180'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '0'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: 4d8dba19985a4e789546130e57a7fb93
+          name: 'Тонер: Ресурс голубого картриджа'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.8.1.1
+          key: cyan.capacity.device
+          delay: '86400'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '1'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '1'
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 05d449744206492383bacc8a6bfc2c76
+          name: 'Тонер: Остаток голубого тонера %'
+          type: CALCULATED
+          key: cyan.percentage
+          delay: '180'
+          history: 30d
+          units: '%'
+          params: '100*last(//cyan.toner.device)/last(//cyan.capacity.device)'
+          tags:
+            - tag: Application
+              value: Счетчики
+          triggers:
+            - uuid: d002850d285341728cf9eb809268d9eb
+              expression: 'last(/Kyocera Color printers/cyan.percentage)<10'
+              name: 'Уровень голубого тонера меньше 10%'
+              status: DISABLED
+              priority: AVERAGE
+        - uuid: 064f17768b434ab5801412edc8086bfd
+          name: 'Тонер: Остаток голубого тонера'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.1
+          key: cyan.toner.device
+          delay: '180'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '0'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: a982cf2fb1b5484488efa72a23caf854
+          name: 'Принтер: Статус на дисплее'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.43.18.2.1.2.1.1
+          key: display.devise
+          delay: '30'
+          history: 1d
+          value_type: TEXT
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var preStr = '';
+                  var preStrAr = value.split(" ");
+                  for (var j = 0; j < preStrAr.length; j++) {
+                      preStr += String.fromCharCode(parseInt(preStrAr[j], 16));
+                  }
+                  var result = "";
+                  var i = 0, c = 0, c2 = 0, c3 = 0;
+                  
+                  while (i < preStr.length) {
+                      c = preStr.charCodeAt(i);
+                  
+                      if (c < 128) {
+                          result += String.fromCharCode(c);
+                          i++;
+                      } else if (c > 191 && c < 224) {
+                          c2 = preStr.charCodeAt(i + 1);
+                          result += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+                          i += 2;
+                      } else {
+                          c2 = preStr.charCodeAt(i + 1);
+                          c3 = preStr.charCodeAt(i + 2);
+                          result += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                          i += 3;
+                      }
+                  }
+                  
+                  return result;
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 584e811e25d34d14a53433e30064e396
+          name: 'Принтер: Код ошибки'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.43.18.2.1.3.1.1
+          key: error.device
+          delay: '10'
+          history: 90d
+          trends: '0'
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+          triggers:
+            - uuid: a5148572d262478a8e24787009059213
+              expression: 'last(/Kyocera Color printers/error.device)=10001'
+              name: 'Готов к работе'
+              status: DISABLED
+              priority: INFO
+            - uuid: 87d83a38c7cf488db55cb5a1cc6d9049
+              expression: 'last(/Kyocera Color printers/error.device)=42001'
+              name: 'Замятие бумаги'
+              priority: INFO
+            - uuid: bbe51c9c08b445a1b54275b536ee67e0
+              expression: 'last(/Kyocera Color printers/error.device)=40601'
+              name: 'Картридж установлен неправильно'
+              priority: INFO
+            - uuid: fe1322ca12ca4ec3b79ba94bd69584ad
+              expression: 'last(/Kyocera Color printers/error.device)=44001'
+              name: 'Открыта передняя крышка'
+              priority: INFO
+            - uuid: e65ead4d43d54a3ba0b0d59e54a8df1c
+              expression: 'last(/Kyocera Color printers/error.device)=35078'
+              name: 'Режим ожидания'
+              status: DISABLED
+              priority: INFO
+        - uuid: 1961af76e4ab4957a9e14da3a86d7685
+          name: 'Версия программного обеспеченгия'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.43.5.4.1.5.1.1
+          key: firmware.device
+          delay: '86400'
+          history: 90d
+          value_type: CHAR
+          inventory_link: SOFTWARE
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 6f0ce3c9cd46420fa701999a48533774
+          name: 'MAC адрес'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.2.2.1.6.1
+          key: mac.device
+          delay: '86400'
+          history: 90d
+          value_type: CHAR
+          inventory_link: MACADDRESS_A
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: bbd1292c44da49e097f8e30e2a761d10
+          name: 'Тонер: Ресурс пурпурного картриджа'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.8.1.2
+          key: magenta.capacity.device
+          delay: '86400'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '1'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '1'
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: be7963fc077648f3999d5e9f7a35fb24
+          name: 'Тонер: Остаток пурпурного тонера %'
+          type: CALCULATED
+          key: magenta.percentage
+          delay: '180'
+          history: 30d
+          units: '%'
+          params: '100*last(//magenta.toner.device)/last(//magenta.capacity.device)'
+          tags:
+            - tag: Application
+              value: Счетчики
+          triggers:
+            - uuid: 2fe9170b40d54d32b991c47ab610739c
+              expression: 'last(/Kyocera Color printers/magenta.percentage)<10'
+              name: 'Уровень пурпурного тонера меньше 10%'
+              status: DISABLED
+              priority: AVERAGE
+        - uuid: 08255fbb3c7f482294823459917055fb
+          name: 'Тонер: Остаток пурпурного тонера'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.2
+          key: magenta.toner.device
+          delay: '180'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '0'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: 58076c4e9e0c45778153a6832c5744f1
+          name: Модель
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.25.3.2.1.3.1
+          key: model.device
+          delay: '86400'
+          history: 90d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 72c65170063e46848a4b4c08c04d6279
+          name: 'IP адрес устройства'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.40.10.1.1.4.1
+          key: network.device
+          delay: '86400'
+          history: 90d
+          value_type: CHAR
+          inventory_link: OOB_IP
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: b1fdafe4216e41818a048a6fb02e5b1c
+          name: 'Отпечатано страниц А4'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.42.2.1.1.1.6.1.1
+          key: printed.device
+          delay: '1800'
+          history: 90d
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: 8ad93adfa8124e4ca5cc143bbe50d549
+          name: 'Отпечатано страниц всего'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.43.10.1.1.12.1.1
+          key: printeda4.device
+          delay: '1800'
+          history: 90d
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: 234e4a31f83449c98a39e487ec0dbabb
+          name: 'Серийный номер'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.1347.43.5.1.1.28.1
+          key: sn.device
+          delay: '86400'
+          history: 90d
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: ccef8fe1c6a149d4b361cb28cabb41eb
+          name: 'Принтер: Код состояния'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.25.3.5.1.1.1
+          key: status.device
+          delay: '10'
+          history: 90d
+          preprocessing:
+            - type: HEX_TO_DECIMAL
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+          triggers:
+            - uuid: cbfaf3d8cabd4b1c9ef28ccebcff8984
+              expression: 'last(/Kyocera Color printers/status.device)=3'
+              name: 'Статус - Готов'
+              status: DISABLED
+              priority: INFO
+            - uuid: 0ee9c1f5766e4f93b837998cb7825d21
+              expression: 'last(/Kyocera Color printers/status.device)=2'
+              name: 'Статус - Неизвестная ошибка'
+              priority: HIGH
+            - uuid: f20de612399c4f538f7f6ae3489b0e98
+              expression: 'last(/Kyocera Color printers/status.device)=4'
+              name: 'Статус - Печатает'
+              status: DISABLED
+              priority: INFO
+            - uuid: d9da0ab592bd4b2bb67383e6d643c9f9
+              expression: 'last(/Kyocera Color printers/status.device)=5'
+              name: 'Статус - Прогрев'
+              status: DISABLED
+              priority: INFO
+            - uuid: e4bdeaa2cbb04abbb57086fba0761048
+              expression: 'last(/Kyocera Color printers/status.device)=1'
+              name: 'Статус - Узел проявки не установлен или принтер требует внимания'
+              status: DISABLED
+              priority: HIGH
+        - uuid: e54edf51091146e7b4632d3a2c2fc186
+          name: 'Время Uptime'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.3.0
+          key: uptime.device
+          delay: '60'
+          history: 90d
+          units: uptime
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: Application
+              value: Счетчики
+        - uuid: 7c9716ae45ee4974a6015336117b46f8
+          name: Расположение
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.1.6.0
+          key: whereis.device
+          delay: '86400'
+          history: 90d
+          value_type: TEXT
+          inventory_link: LOCATION
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 226892c1a1ac40e29191aae810024783
+          name: 'Тонер: Ресурс желтого картриджа'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.8.1.3
+          key: yellow.capacity.device
+          delay: '86400'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '1'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '1'
+          tags:
+            - tag: Application
+              value: 'Данные о принтере'
+        - uuid: 717983ec099f4404aad3b6ea7990ad20
+          name: 'Тонер: Остаток желтого тонера %'
+          type: CALCULATED
+          key: yellow.percentage
+          delay: '180'
+          history: 30d
+          units: '%'
+          params: '100*last(//yellow.toner.device)/last(//yellow.capacity.device)'
+          tags:
+            - tag: Application
+              value: Счетчики
+          triggers:
+            - uuid: e69232d16bed4444b79bb78a9ef00aac
+              expression: 'last(/Kyocera Color printers/yellow.percentage)<10'
+              name: 'Уровень желтого тонера меньше 10%'
+              status: DISABLED
+              priority: AVERAGE
+        - uuid: 9cf8dbd1dc0342beb9f4a7f3a2e660f8
+          name: 'Тонер: Остаток желтого тонера'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.3
+          key: yellow.toner.device
+          delay: '180'
+          history: 90d
+          preprocessing:
+            - type: IN_RANGE
+              parameters:
+                - '0'
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: Application
+              value: Счетчики
+      discovery_rules:
+        - uuid: e96178db25a548d08c0145fe1193f1c4
+          name: 'Kyocera Detect'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.4.1.1347.40.10.1.1.5.1]'
+          key: find.device
+          delay: '15'
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+  graphs:
+    - uuid: 73b89c1452294f359d7b66487df67d87
+      name: 'Остаток тонера'
+      yaxismax: '0'
+      graph_items:
+        - color: 199C0D
+          calc_fnc: ALL
+          item:
+            host: 'Kyocera Color printers'
+            key: cyan.percentage
+        - sortorder: '1'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'Kyocera Color printers'
+            key: yellow.percentage
+        - sortorder: '2'
+          color: 2774A4
+          calc_fnc: ALL
+          item:
+            host: 'Kyocera Color printers'
+            key: magenta.percentage
+        - sortorder: '3'
+          color: F7941D
+          calc_fnc: ALL
+          item:
+            host: 'Kyocera Color printers'
+            key: black.percentage
+    - uuid: ec110aec608a4e0989bf6dcd626a9aac
+      name: 'Отпечатано страниц'
+      graph_items:
+        - color: FF8F00
+          calc_fnc: MIN
+          item:
+            host: 'Kyocera Color printers'
+            key: printeda4.device
