@@ -2,13 +2,13 @@ zabbix_export:
   version: '7.4'
   template_groups:
     - uuid: 480670e29a204d208ec225ccace9c3bb
-      name: 'Kyocera printers'
+      name: 'Templates/Kyocera printers'
   templates:
     - uuid: b8ddcf776b774742bc6b4c0463bde997
       template: 'Kyocera Color printers'
       name: 'Kyocera Color printers'
       groups:
-        - name: 'Kyocera printers'
+        - name: 'Templates/Kyocera printers'
       items:
         - uuid: 52e015ca0add4b35b9bf921384778d73
           name: 'Тонер: Ресурс черного картриджа'
@@ -32,7 +32,7 @@ zabbix_export:
           type: CALCULATED
           key: black.percentage
           delay: '180'
-          history: 30d
+          history: 90d
           units: '%'
           params: '100*last(//black.toner.device)/last(//black.capacity.device)'
           tags:
@@ -50,7 +50,7 @@ zabbix_export:
           snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.4
           key: black.toner.device
           delay: '180'
-          history: 90d
+          history: 10d
           preprocessing:
             - type: IN_RANGE
               parameters:
@@ -83,7 +83,7 @@ zabbix_export:
           type: CALCULATED
           key: cyan.percentage
           delay: '180'
-          history: 30d
+          history: 90d
           units: '%'
           params: '100*last(//cyan.toner.device)/last(//cyan.capacity.device)'
           tags:
@@ -101,7 +101,7 @@ zabbix_export:
           snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.1
           key: cyan.toner.device
           delay: '180'
-          history: 90d
+          history: 10d
           preprocessing:
             - type: IN_RANGE
               parameters:
@@ -161,15 +161,22 @@ zabbix_export:
           key: error.device
           delay: '10'
           history: 90d
-          trends: '0'
           tags:
             - tag: Application
               value: 'Данные о принтере'
           triggers:
+            - uuid: 2e840569cb67412596bb1a2e2cb77086
+              expression: 'last(/Kyocera Color printers/error.device)=40010'
+              name: 'Бункер тонера зополнен'
+              priority: INFO
             - uuid: a5148572d262478a8e24787009059213
               expression: 'last(/Kyocera Color printers/error.device)=10001'
               name: 'Готов к работе'
               status: DISABLED
+              priority: INFO
+            - uuid: e59582856a634a86b473cc4d33fad4ba
+              expression: 'last(/Kyocera Color printers/error.device)=10013'
+              name: 'Добавление тонера'
               priority: INFO
             - uuid: 87d83a38c7cf488db55cb5a1cc6d9049
               expression: 'last(/Kyocera Color printers/error.device)=42001'
@@ -179,9 +186,27 @@ zabbix_export:
               expression: 'last(/Kyocera Color printers/error.device)=40601'
               name: 'Картридж установлен неправильно'
               priority: INFO
+            - uuid: 7361e84c168f4a83babad96f874a0b32
+              expression: 'last(/Kyocera Color printers/error.device)=46412'
+              name: 'Неоригинальный картридж'
+              priority: INFO
+            - uuid: fda205956982470781db9e5fa2485398
+              expression: 'last(/Kyocera Color printers/error.device)=10023'
+              name: Обработка
+              status: DISABLED
+              priority: INFO
+            - uuid: 9937384c93f64294b24e6802378882c5
+              expression: 'last(/Kyocera Color printers/error.device)=440002'
+              name: 'Открыта верхняя крышка'
+              priority: INFO
+            - uuid: c839457c14a84493a4e1806193265be1
+              expression: 'last(/Kyocera Color printers/error.device)=44031'
+              name: 'Открыта крышка бункера'
+              priority: INFO
             - uuid: fe1322ca12ca4ec3b79ba94bd69584ad
               expression: 'last(/Kyocera Color printers/error.device)=44001'
               name: 'Открыта передняя крышка'
+              status: DISABLED
               priority: INFO
             - uuid: e65ead4d43d54a3ba0b0d59e54a8df1c
               expression: 'last(/Kyocera Color printers/error.device)=35078'
@@ -234,7 +259,7 @@ zabbix_export:
           type: CALCULATED
           key: magenta.percentage
           delay: '180'
-          history: 30d
+          history: 90d
           units: '%'
           params: '100*last(//magenta.toner.device)/last(//magenta.capacity.device)'
           tags:
@@ -252,7 +277,7 @@ zabbix_export:
           snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.2
           key: magenta.toner.device
           delay: '180'
-          history: 90d
+          history: 10d
           preprocessing:
             - type: IN_RANGE
               parameters:
@@ -360,7 +385,7 @@ zabbix_export:
           type: SNMP_AGENT
           snmp_oid: .1.3.6.1.2.1.1.3.0
           key: uptime.device
-          delay: '60'
+          delay: '600'
           history: 90d
           units: uptime
           preprocessing:
@@ -404,7 +429,7 @@ zabbix_export:
           type: CALCULATED
           key: yellow.percentage
           delay: '180'
-          history: 30d
+          history: 90d
           units: '%'
           params: '100*last(//yellow.toner.device)/last(//yellow.capacity.device)'
           tags:
@@ -422,7 +447,7 @@ zabbix_export:
           snmp_oid: .1.3.6.1.2.1.43.11.1.1.9.1.3
           key: yellow.toner.device
           delay: '180'
-          history: 90d
+          history: 10d
           preprocessing:
             - type: IN_RANGE
               parameters:
