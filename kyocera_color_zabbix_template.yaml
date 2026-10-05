@@ -178,9 +178,21 @@ zabbix_export:
               expression: 'last(/Kyocera Color printers/error.device)=10013'
               name: 'Добавление тонера'
               priority: INFO
+            - uuid: 5fa6c96417f747c8a992c385d2f91ad4
+              expression: 'last(/Kyocera Color printers/error.device)=46108'
+              name: 'Закончился тонер (C-голубой)'
+              priority: INFO
+            - uuid: f8ca8a3b35994d26a191dc3ebdd57838
+              expression: 'last(/Kyocera Color printers/error.device)=46102'
+              name: 'Закончился тонер (Y-желтый)'
+              priority: INFO
             - uuid: 87d83a38c7cf488db55cb5a1cc6d9049
               expression: 'last(/Kyocera Color printers/error.device)=42001'
               name: 'Замятие бумаги'
+              priority: INFO
+            - uuid: bd73575e4ec7432ab903a19af55b46bf
+              expression: 'last(/Kyocera Color printers/error.device)=42100'
+              name: 'Замятие бумаги в переднем лотке'
               priority: INFO
             - uuid: bbe51c9c08b445a1b54275b536ee67e0
               expression: 'last(/Kyocera Color printers/error.device)=40601'
@@ -196,7 +208,7 @@ zabbix_export:
               status: DISABLED
               priority: INFO
             - uuid: 9937384c93f64294b24e6802378882c5
-              expression: 'last(/Kyocera Color printers/error.device)=440002'
+              expression: 'last(/Kyocera Color printers/error.device)=44002'
               name: 'Открыта верхняя крышка'
               priority: INFO
             - uuid: c839457c14a84493a4e1806193265be1
